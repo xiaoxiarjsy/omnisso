@@ -14,6 +14,8 @@ type Env = {
 type User = {
   sub: string
   email: string
+  given_name: string
+  family_name: string
 }
 
 type AuthCode = {
@@ -104,7 +106,19 @@ async function handleDiscovery(request: Request, env: Env): Promise<Response> {
     id_token_signing_alg_values_supported: ['RS256'],
     token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],
     scopes_supported: ['openid', 'email', 'profile'],
-    claims_supported: ['iss', 'aud', 'sub', 'email', 'email_verified', 'exp', 'iat', 'auth_time', 'nonce']
+    claims_supported: [
+      'iss',
+      'aud',
+      'sub',
+      'email',
+      'email_verified',
+      'given_name',
+      'family_name',
+      'exp',
+      'iat',
+      'auth_time',
+      'nonce'
+    ]
   })
 }
 
@@ -265,8 +279,29 @@ function validateUser(rawEmail: string, password: string): User | null {
 
   return {
     sub: email,
-    email
+    email,
+    ...nameClaimsFromEmailPrefix(prefix)
   }
+}
+
+function nameClaimsFromEmailPrefix(prefix: string): Pick<User, 'given_name' | 'family_name'> {
+  const parts = prefix
+    .split(/[._-]+/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+
+  return {
+    given_name: titleCase(parts[0] || prefix),
+    family_name: titleCase(parts.slice(1).join(' ') || 'User')
+  }
+}
+
+function titleCase(value: string): string {
+  if (!value) {
+    return value
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
 async function signIdToken(issuer: string, clientId: string, authCode: AuthCode, privateJwk: PrivateJwk): Promise<string> {
@@ -293,6 +328,8 @@ async function signIdToken(issuer: string, clientId: string, authCode: AuthCode,
     sub: authCode.user.sub,
     email: authCode.user.email,
     email_verified: true,
+    given_name: authCode.user.given_name,
+    family_name: authCode.user.family_name,
     iat: now,
     auth_time: authCode.auth_time,
     exp: now + ID_TOKEN_TTL_SECONDS

@@ -144,3 +144,12 @@ GET  /ui/
 ## 注意
 
 `OIDC_PRIVATE_JWK` 需要长期保持稳定。更换它会导致 JWKS 公钥变化，旧的 ID Token 将无法通过验签。
+
+ID Token 会包含 OpenAI 要求的基础 claims：
+
+```text
+sub
+email
+given_name
+family_name
+```

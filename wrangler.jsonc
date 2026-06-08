@@ -3,6 +3,7 @@
   "name": "omnisso",
   "main": "src/worker/index.ts",
   "compatibility_date": "2026-06-08",
+  "keep_vars": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -34,8 +35,15 @@
       ]
     }
   ],
+  "secrets": {
+    "required": [
+      "OIDC_CLIENT_SECRET",
+      "OIDC_PRIVATE_JWK"
+    ]
+  },
   "vars": {
+    "ISSUER": "https://sso.aicnio.com",
     "OIDC_CLIENT_ID": "openai-workspace",
-    "OIDC_REDIRECT_URI": ""
+    "OIDC_REDIRECT_URI": "https://external.auth.openai.com/sso/oidc/rxOnGtpO5HbiplDmonS6fxGLp/callback"
   }
 }

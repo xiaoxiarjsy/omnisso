@@ -111,6 +111,8 @@ OIDC_CLIENT_ID={OpenAI 中配置的 Client ID}
 
 `OIDC_CLIENT_SECRET` 和 `OIDC_PRIVATE_JWK` 必须用 secret，不要写进 Git。
 
+本项目使用 GitHub 连接 Cloudflare Workers Builds，部署命令会执行 `npx wrangler deploy`。因此 `wrangler.jsonc` 是普通变量的主要来源；配置中已设置 `keep_vars: true`，避免下次部署覆盖 Dashboard 中手动维护的变量。敏感信息仍然必须通过 Cloudflare Dashboard 或 `wrangler secret put` 设置为 Secret。
+
 ## OpenAI OIDC 配置
 
 假设部署域名是：

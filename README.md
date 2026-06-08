@@ -153,3 +153,5 @@ email
 given_name
 family_name
 ```
+
+`given_name` 和 `family_name` 会在每次登录时从内置词库中随机组合生成；`sub` 和 `email` 保持稳定，用于识别真实用户。

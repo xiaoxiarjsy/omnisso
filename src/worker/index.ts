@@ -1,6 +1,88 @@
 const AUTH_CODE_TTL_SECONDS = 300
 const ID_TOKEN_TTL_SECONDS = 3600
 
+const GIVEN_NAME_POOL = [
+  'Aiden',
+  'Alice',
+  'Amelia',
+  'Aria',
+  'Avery',
+  'Bella',
+  'Blake',
+  'Caleb',
+  'Chloe',
+  'Daniel',
+  'Dylan',
+  'Emma',
+  'Ethan',
+  'Felix',
+  'Grace',
+  'Harper',
+  'Henry',
+  'Iris',
+  'Jack',
+  'Jasper',
+  'Leo',
+  'Liam',
+  'Lily',
+  'Logan',
+  'Lucas',
+  'Mason',
+  'Mia',
+  'Noah',
+  'Nora',
+  'Olivia',
+  'Owen',
+  'Ruby',
+  'Ryan',
+  'Sofia',
+  'Theo',
+  'Violet',
+  'William',
+  'Zoe'
+] as const
+
+const FAMILY_NAME_POOL = [
+  'Anderson',
+  'Bennett',
+  'Brooks',
+  'Carter',
+  'Chen',
+  'Clark',
+  'Cooper',
+  'Davis',
+  'Evans',
+  'Foster',
+  'Garcia',
+  'Green',
+  'Hall',
+  'Harris',
+  'Hill',
+  'Hughes',
+  'Johnson',
+  'King',
+  'Lee',
+  'Lewis',
+  'Martin',
+  'Miller',
+  'Mitchell',
+  'Morgan',
+  'Nelson',
+  'Parker',
+  'Reed',
+  'Rivera',
+  'Roberts',
+  'Scott',
+  'Smith',
+  'Taylor',
+  'Thomas',
+  'Turner',
+  'Walker',
+  'Wang',
+  'White',
+  'Young'
+] as const
+
 type Env = {
   ASSETS: Fetcher
   AUTH_CODES: DurableObjectNamespace
@@ -280,28 +362,22 @@ function validateUser(rawEmail: string, password: string): User | null {
   return {
     sub: email,
     email,
-    ...nameClaimsFromEmailPrefix(prefix)
+    ...randomNameClaims()
   }
 }
 
-function nameClaimsFromEmailPrefix(prefix: string): Pick<User, 'given_name' | 'family_name'> {
-  const parts = prefix
-    .split(/[._-]+/)
-    .map((part) => part.trim())
-    .filter(Boolean)
-
+function randomNameClaims(): Pick<User, 'given_name' | 'family_name'> {
   return {
-    given_name: titleCase(parts[0] || prefix),
-    family_name: titleCase(parts.slice(1).join(' ') || 'User')
+    given_name: randomChoice(GIVEN_NAME_POOL),
+    family_name: randomChoice(FAMILY_NAME_POOL)
   }
 }
 
-function titleCase(value: string): string {
-  if (!value) {
-    return value
-  }
+function randomChoice<T>(items: readonly T[]): T {
+  const bytes = new Uint32Array(1)
+  crypto.getRandomValues(bytes)
 
-  return value.charAt(0).toUpperCase() + value.slice(1)
+  return items[bytes[0] % items.length]
 }
 
 async function signIdToken(issuer: string, clientId: string, authCode: AuthCode, privateJwk: PrivateJwk): Promise<string> {
